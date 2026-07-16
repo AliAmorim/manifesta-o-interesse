@@ -14,7 +14,7 @@ This archive is the source of truth for turning the design into production code.
 - HTML screens detected: 1
 - Stylesheets detected: 0
 - Script/component files detected: 0
-- Supporting assets detected: 1
+- Supporting assets detected: 4
 
 ## Responsive contract
 Validate the implementation across this 2025–2026 viewport matrix:
@@ -72,7 +72,10 @@ For responsive web exports, treat these as a modern breakpoint system for one ad
 - None detected
 
 ## Assets and supporting files
+- `feature-manifestacao-interesse.md`
 - `mr11n731-Captura-de-tela-2026-06-30-163223.png`
+- `prd-manifestacao-interesse.md`
+- `user-story-adesao.md`
 
 ## Coding checklist for AI tools
 1. Inspect `adesao-diario-classe.html` and `DESIGN-MANIFEST.json` first and identify reusable components before coding.

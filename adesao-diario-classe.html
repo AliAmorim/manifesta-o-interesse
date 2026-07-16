@@ -1,0 +1,1219 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Diário de Classe · Sala do Futuro</title>
+  <style>
+    :root {
+      --bg: #f0f4f8;
+      --surface: #ffffff;
+      --fg: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-soft: #dbeafe;
+      --success: #16a34a;
+      --success-soft: #dcfce7;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+      --fs-h1: clamp(24px, 3.6vw, 36px);
+      --fs-h2: clamp(20px, 2.4vw, 28px);
+      --fs-h3: 17px;
+      --fs-body: 15px;
+      --fs-small: 13px;
+      --gap-xs: 6px;
+      --gap-sm: 10px;
+      --gap-md: 16px;
+      --gap-lg: 28px;
+      --gap-xl: 40px;
+      --container: 960px;
+      --gutter: 20px;
+      --radius: 6px;
+      --radius-lg: 8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font);
+      font-size: var(--fs-body);
+      line-height: 1.5;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; cursor: pointer; }
+    p { text-wrap: pretty; margin: 0; }
+    h1, h2, h3, h4 { text-wrap: balance; margin: 0; }
+
+    .container {
+      max-width: var(--container);
+      margin-inline: auto;
+      padding-inline: var(--gutter);
+    }
+
+    /* ─── Top Navigation ─── */
+    .topnav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .topnav-inner {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-lg);
+    }
+    .topnav-brand {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--fg);
+      padding: 14px 0;
+      white-space: nowrap;
+      letter-spacing: -0.01em;
+    }
+    .topnav-brand span {
+      color: var(--muted);
+      font-weight: 400;
+    }
+    .topnav-tabs {
+      display: flex;
+      gap: 0;
+      margin-left: var(--gap-md);
+    }
+    .topnav-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 18px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      transition: color 0.15s, border-color 0.15s;
+      text-decoration: none;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .topnav-tab:hover { color: var(--fg); }
+    .topnav-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .topnav-tab svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    /* ─── Step Menu (Manifestação) ─── */
+    .step-menu {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .step-menu-inner {
+      display: flex;
+      align-items: center;
+    }
+    .step-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 18px;
+      background: none;
+      border: none;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      transition: color 0.15s;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .step-menu-item:hover { color: var(--fg); }
+    .step-menu-item.active { color: var(--accent); }
+    .step-menu-num {
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--border);
+      color: var(--muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .step-menu-item.active .step-menu-num {
+      background: var(--accent);
+      color: #fff;
+    }
+    .step-menu-item.done { color: var(--accent); }
+    .step-menu-item.done .step-menu-num {
+      background: var(--accent);
+      color: #fff;
+    }
+    .step-menu-item.future {
+      opacity: 0.4;
+      cursor: default;
+      pointer-events: none;
+    }
+    .step-menu-sep {
+      width: 1px;
+      height: 22px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    main { padding-top: var(--gap-xl); padding-bottom: var(--gap-xl); }
+
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+
+    .step-content { display: none; }
+    .step-content.active { display: block; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+    }
+
+    .card-title {
+      font-size: var(--fs-h2);
+      font-weight: 600;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      margin-bottom: 6px;
+    }
+    .card-desc {
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: var(--gap-lg);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap-md);
+      margin-bottom: var(--gap-lg);
+    }
+    @media (max-width: 600px) {
+      .summary-grid { grid-template-columns: 1fr; }
+    }
+    .summary-item {
+      padding: var(--gap-md);
+      background: var(--bg);
+      border-radius: var(--radius);
+    }
+    .summary-item h3 { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+    .summary-item p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .summary-item ul { margin: 4px 0 0; padding-left: 16px; font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+    .disclaimer {
+      padding: var(--gap-md);
+      background: var(--accent-soft);
+      border-radius: var(--radius);
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: var(--gap-lg);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 22px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.15s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--fg);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--muted); }
+
+    .btn-row {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-sm);
+    }
+    .btn-row-center { justify-content: center; }
+
+    .term-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      color: var(--accent);
+      background: none;
+      border: none;
+      padding: 0;
+      font-weight: 500;
+      margin-bottom: var(--gap-md);
+    }
+    .term-toggle:hover { text-decoration: underline; }
+
+    .term-text {
+      font-size: 14px;
+      line-height: 1.65;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+    }
+    .term-text.open { max-height: none; }
+    .term-text-inner { padding-top: var(--gap-md); }
+    .term-text h4 {
+      font-size: 15px;
+      font-weight: 600;
+      margin: var(--gap-lg) 0 var(--gap-xs);
+    }
+    .term-text h4:first-child { margin-top: 0; }
+    .term-text p { margin: 0 0 var(--gap-sm); line-height: 1.65; }
+    .term-text ul { margin: 0 0 var(--gap-sm); padding-left: 20px; color: var(--muted); line-height: 1.7; font-size: 14px; }
+
+    .accept-row {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--gap-sm);
+      margin-top: var(--gap-lg);
+      margin-bottom: var(--gap-lg);
+    }
+    .accept-row input[type="checkbox"] {
+      width: 18px; height: 18px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .accept-row label {
+      font-size: 14px;
+      cursor: pointer;
+      line-height: 1.5;
+    }
+
+    .confirma-icon {
+      text-align: center;
+      margin-bottom: var(--gap-md);
+    }
+    .confirma-icon svg {
+      width: 64px; height: 64px;
+      color: var(--accent);
+    }
+    .confirma-lead {
+      max-width: 44ch;
+      margin: 6px auto 0;
+      color: var(--muted);
+    }
+
+    /* ─── Report Styles ─── */
+    .page-header {
+      padding-top: var(--gap-xl);
+      padding-bottom: var(--gap-md);
+    }
+    .page-header h1 {
+      font-size: var(--fs-h2);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .page-header p {
+      color: var(--muted);
+      margin-top: 4px;
+      font-size: 14px;
+    }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--gap-md);
+      margin-bottom: var(--gap-lg);
+    }
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--gap-sm);
+    }
+    .summary-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    .summary-card-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+    .summary-card-icon.total { background: var(--accent-soft); color: var(--accent); }
+    .summary-card-info { flex: 1; min-width: 0; }
+    .summary-card-value {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+    .summary-card-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .filters-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--gap-md);
+      margin-bottom: var(--gap-md);
+      display: flex;
+      align-items: flex-end;
+      gap: var(--gap-md);
+      flex-wrap: wrap;
+    }
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 160px;
+    }
+    .filter-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .filter-group select,
+    .filter-group input {
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-family: var(--font);
+      color: var(--fg);
+      background: var(--surface);
+      transition: border-color 0.15s;
+    }
+    .filter-group select:focus,
+    .filter-group input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+    .filter-actions {
+      display: flex;
+      gap: var(--gap-sm);
+      flex-shrink: 0;
+    }
+    .filter-actions .btn svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }
+
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .table-scroll {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    thead {
+      background: var(--bg);
+    }
+    th {
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 14px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(37, 99, 235, 0.02); }
+    td.municipio-cell { font-weight: 500; }
+    td.date-cell {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .table-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+      background: var(--surface);
+    }
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .pagination button {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      background: none;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .pagination button:hover {
+      background: var(--bg);
+      color: var(--fg);
+    }
+    .pagination button.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .pagination button:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: var(--gap-md);
+      opacity: 0.4;
+    }
+    .empty-state h3 {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--fg);
+      margin-bottom: 4px;
+    }
+    .empty-state p {
+      font-size: 14px;
+      max-width: 40ch;
+      margin: 0 auto;
+    }
+
+    .pagefoot {
+      padding-block: var(--gap-lg);
+      color: var(--muted);
+      font-size: var(--fs-small);
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .filters-bar { flex-direction: column; }
+      .filter-group { min-width: 100%; }
+      .filter-actions { width: 100%; }
+      .filter-actions .btn { flex: 1; }
+      .table-footer { flex-direction: column; gap: var(--gap-sm); }
+      .topnav-brand span { display: none; }
+      .topnav-tab { padding: 12px 12px; font-size: 13px; }
+      th, td { padding: 10px 12px; }
+      .summary-card-value { font-size: 24px; }
+      .step-menu-item { padding: 12px 10px; font-size: 13px; gap: 6px; }
+      .step-menu-label { display: none; }
+      .card { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav">
+    <div class="container topnav-inner">
+      <div class="topnav-brand">Diário de Classe <span>Municípios</span></div>
+      <div class="topnav-tabs">
+        <button class="topnav-tab active" data-view="manifestacao" onclick="trocarView('manifestacao')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Manifestação
+        </button>
+        <button class="topnav-tab" data-view="relatorio" onclick="trocarView('relatorio')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Relatório
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- VIEW: Manifestação                          -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="page-section active" id="view-manifestacao">
+
+      <nav class="step-menu">
+        <div class="container step-menu-inner">
+          <button class="step-menu-item active" data-step="1" onclick="irPara(1)">
+            <span class="step-menu-num">1</span>
+            <span class="step-menu-label">Município</span>
+          </button>
+          <span class="step-menu-sep"></span>
+          <button class="step-menu-item future" data-step="2" onclick="irPara(2)">
+            <span class="step-menu-num">2</span>
+            <span class="step-menu-label">Resumo</span>
+          </button>
+          <span class="step-menu-sep"></span>
+          <button class="step-menu-item future" data-step="3" onclick="irPara(3)">
+            <span class="step-menu-num">3</span>
+            <span class="step-menu-label">Aceite</span>
+          </button>
+          <span class="step-menu-sep"></span>
+          <button class="step-menu-item future" data-step="4" onclick="irPara(4)">
+            <span class="step-menu-num">4</span>
+            <span class="step-menu-label">Confirmação</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Etapa 1 — Município -->
+      <section class="step-content active" id="step-1">
+        <div class="container">
+          <div class="card">
+            <h2 class="card-title">Selecione o município</h2>
+            <p class="card-desc">
+              Escolha o município para iniciar a manifestação de interesse.
+            </p>
+            <div style="margin-bottom:var(--gap-lg)">
+              <label for="selMun" style="display:block;font-size:13px;font-weight:600;margin-bottom:4px">Município</label>
+              <select id="selMun" onchange="validarSelecao()" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;background:var(--surface);color:var(--fg);font-family:var(--font)">
+                <option value="">Selecione o município</option>
+              </select>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-primary" id="btnStep1" disabled onclick="avancar()">Continuar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Etapa 2 — Resumo -->
+      <section class="step-content" id="step-2">
+        <div class="container">
+          <div class="card">
+            <h2 class="card-title">Manifestação de Interesse</h2>
+            <p class="card-desc">
+              Formalize o interesse do município na utilização do Diário de Classe
+              da plataforma Sala do Futuro. Após a manifestação, a solicitação será
+              analisada e a disponibilização do módulo dependerá do atendimento
+              aos requisitos técnicos e funcionais.
+            </p>
+            <div class="summary-grid">
+              <div class="summary-item">
+                <h3>Módulos disponíveis</h3>
+                <ul>
+                  <li>Frequência</li>
+                  <li>Registro de Aulas</li>
+                  <li>Avaliações</li>
+                  <li>Fechamento</li>
+                  <li>Boletim</li>
+                </ul>
+              </div>
+              <div class="summary-item">
+                <h3>Configuração obrigatória</h3>
+                <p>Requer os módulos integrados da plataforma devidamente configurados e atualizados para o funcionamento do Diário de Classe.</p>
+              </div>
+              <div class="summary-item">
+                <h3>Perfis de acesso</h3>
+                <p>O acesso será concedido conforme os vínculos e permissões cadastrados para cada usuário.</p>
+              </div>
+              <div class="summary-item">
+                <h3>Infraestrutura</h3>
+                <p>O município é responsável por disponibilizar equipamentos, acesso à internet e demais recursos necessários para utilização do sistema.</p>
+              </div>
+            </div>
+            <div class="disclaimer">
+              Ao manifestar interesse, o município declara estar ciente dos
+              requisitos para utilização do Diário de Classe, das dependências
+              entre os módulos da plataforma, das responsabilidades previstas
+              neste processo e das disposições relativas à proteção de dados
+              pessoais (LGPD).
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-secondary" onclick="voltar()">Voltar</button>
+              <button class="btn btn-primary" onclick="avancar()">Continuar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Etapa 3 — Aceite -->
+      <section class="step-content" id="step-3">
+        <div class="container">
+          <div class="card">
+            <h2 class="card-title">Aceite do Termo</h2>
+            <p class="card-desc">
+              Leia o termo completo e marque a opção de aceite para confirmar a
+              manifestação de interesse.
+            </p>
+
+            <button class="term-toggle" id="termToggle" onclick="toggleTermo()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              Ler termo completo
+            </button>
+
+            <div class="term-text" id="termText">
+              <div class="term-text-inner">
+                <h4>TERMO DE MANIFESTAÇÃO DE INTERESSE PARA UTILIZAÇÃO DO DIÁRIO DE CLASSE</h4>
+                <p><strong>1. Objetivo</strong></p>
+                <p>O presente Termo de Manifestação de Interesse tem por objetivo formalizar o interesse do município na utilização do módulo Diário de Classe, disponibilizado na plataforma Sala do Futuro, bem como apresentar os requisitos funcionais, operacionais e técnicos necessários para sua futura utilização.</p>
+                <p>A manifestação de interesse não caracteriza a liberação imediata do acesso ao sistema, estando sua disponibilização condicionada ao atendimento dos requisitos estabelecidos neste documento e aos procedimentos definidos pela Secretaria da Educação.</p>
+                <p><strong>2. Sobre o Diário de Classe</strong></p>
+                <p>O Diário de Classe é uma solução destinada ao registro e acompanhamento das atividades acadêmicas das unidades escolares.</p>
+                <p>Por meio do sistema, os usuários poderão realizar atividades como:</p>
+                <ul>
+                  <li>lançamento de frequência dos estudantes;</li>
+                  <li>registro das aulas ministradas;</li>
+                  <li>lançamento de avaliações;</li>
+                  <li>lançamento de notas;</li>
+                  <li>acompanhamento do desempenho escolar;</li>
+                  <li>consulta de informações acadêmicas;</li>
+                  <li>acompanhamento pedagógico das turmas.</li>
+                </ul>
+                <p><strong>3. Requisitos para Utilização</strong></p>
+                <p>Para utilização do Diário de Classe, o município deverá possuir acesso ativo à plataforma Sala do Futuro e atender aos requisitos funcionais descritos neste documento.</p>
+                <p>O correto funcionamento do Diário de Classe depende da existência, manutenção e atualização das informações provenientes dos demais módulos e sistemas integrados da plataforma.</p>
+                <p>Além disso, o município deverá possuir infraestrutura tecnológica adequada para acesso ao sistema, incluindo computadores, dispositivos móveis, acesso à internet e demais recursos necessários à sua operação.</p>
+                <p><strong>4. Dependências Funcionais</strong></p>
+                <p>Para que o Diário de Classe possa ser utilizado, deverão estar devidamente configurados e atualizados os seguintes módulos:</p>
+                <ul>
+                  <li><strong>Coleta de Classes</strong> — turmas da rede de ensino;</li>
+                  <li><strong>Matrícula</strong> — vínculo dos estudantes às turmas;</li>
+                  <li><strong>Fundamento Legal</strong> — componentes curriculares;</li>
+                  <li><strong>Matriz Curricular</strong> — disciplinas ofertadas;</li>
+                  <li><strong>Quadro Aula</strong> — distribuição das aulas nas turmas;</li>
+                  <li><strong>Calendário Escolar</strong> — dias letivos e não letivos;</li>
+                  <li><strong>Atribuição de Professores</strong> — vínculo entre docentes e turmas;</li>
+                  <li><strong>Grade Horária</strong> — organização dos horários (uso não obrigatório).</li>
+                </ul>
+                <p><strong>5. Perfis de Acesso</strong></p>
+                <p>Os usuários deverão possuir acesso ativo à plataforma Sala do Futuro e permissões compatíveis com suas atribuições.</p>
+                <p>O acesso ao Diário de Classe será concedido de acordo com os vínculos e permissões cadastrados nos sistemas integrados.</p>
+                <p><strong>6. Responsabilidades do Município</strong></p>
+                <p>Ao manifestar interesse na utilização do Diário de Classe, o município declara estar ciente de que:</p>
+                <ul>
+                  <li>deverá manter atualizadas as informações cadastrais e acadêmicas;</li>
+                  <li>deverá realizar as configurações obrigatórias dos módulos integrados;</li>
+                  <li>deverá garantir a consistência e qualidade dos dados utilizados;</li>
+                  <li>será responsável pela administração dos usuários da rede de ensino sob sua gestão;</li>
+                  <li>deverá observar os procedimentos definidos pela Secretaria da Educação;</li>
+                  <li>será responsável por disponibilizar a infraestrutura tecnológica necessária para utilização do sistema, incluindo equipamentos, acesso à internet e demais recursos necessários ao uso da solução.</li>
+                </ul>
+                <p><strong>7. Infraestrutura e Equipamentos</strong></p>
+                <p>A disponibilização do Diário de Classe compreende exclusivamente o acesso ao sistema.</p>
+                <p>A Secretaria da Educação não fornecerá computadores, notebooks, tablets, dispositivos móveis, equipamentos de rede, acesso à internet ou quaisquer outros recursos de infraestrutura necessários para utilização do sistema, sendo tais itens de responsabilidade exclusiva do município.</p>
+                <p><strong>8. Proteção de Dados Pessoais</strong></p>
+                <p>O município declara estar ciente de que a utilização do Diário de Classe envolve o tratamento de dados pessoais de estudantes, responsáveis, docentes e demais usuários.</p>
+                <p>Compete ao município observar as disposições da Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018), adotando as medidas administrativas, técnicas e organizacionais necessárias para garantir a proteção dos dados pessoais tratados no âmbito de sua atuação, bem como assegurar que o acesso ao sistema seja realizado exclusivamente por usuários devidamente autorizados.</p>
+                <p>O município compromete-se, ainda, a utilizar as informações acessadas exclusivamente para as finalidades educacionais e administrativas relacionadas à execução das atividades da rede de ensino, observando os princípios da finalidade, necessidade, segurança e confidencialidade previstos na legislação vigente.</p>
+                <p><strong>9. Considerações Gerais</strong></p>
+                <p>O Diário de Classe depende da correta integração entre os módulos da plataforma Sala do Futuro. A ausência, inconsistência ou desatualização das informações provenientes dos sistemas integrados poderá impactar diretamente o funcionamento do sistema e a realização dos registros acadêmicos.</p>
+                <p>As regras, integrações e fluxos descritos neste documento representam o modelo atualmente adotado e poderão sofrer alterações conforme a evolução funcional da plataforma.</p>
+                <p>A assinatura deste Termo representa apenas a manifestação de interesse do município na utilização da solução e a ciência quanto aos requisitos técnicos, funcionais e operacionais necessários para sua implantação, não gerando obrigação imediata de disponibilização do sistema pela Secretaria da Educação.</p>
+                <p><strong>10. Manifestação de Interesse</strong></p>
+                <p>Ao concordar com este documento, o representante legal do município declara estar ciente das condições, responsabilidades e requisitos estabelecidos neste Termo de Manifestação de Interesse para utilização do Diário de Classe.</p>
+              </div>
+            </div>
+
+            <div class="accept-row">
+              <input type="checkbox" id="acceptCheck" onchange="toggleConfirmBtn()" />
+              <label for="acceptCheck">
+                Li e concordo com o Termo de Manifestação de Interesse para
+                utilização do Diário de Classe, estando ciente das condições
+                e responsabilidades descritas.
+              </label>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn btn-secondary" onclick="voltar()">Voltar</button>
+              <button class="btn btn-primary" id="confirmBtn" disabled onclick="avancar()">Confirmar manifestação</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Etapa 4 — Confirmação -->
+      <section class="step-content" id="step-4">
+        <div class="container">
+          <div class="card">
+            <div class="confirma-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <h2 class="card-title" style="text-align:center">Interesse registrado com sucesso</h2>
+            <p class="confirma-lead" style="text-align:center">
+              A manifestação de interesse do município foi enviada com sucesso.
+            </p>
+            <p class="confirma-lead" style="text-align:center;margin-top:12px">
+              A Secretaria da Educação realizará a definição do público-alvo para
+              utilização do Diário de Classe. Após essa etapa, o município será
+              comunicado sobre a disponibilização do acesso e as orientações para
+              utilização da solução.
+            </p>
+            <div class="btn-row btn-row-center" style="margin-top:var(--gap-lg)">
+              <button class="btn btn-primary" onclick="voltarAoInicio()">Voltar ao início</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- VIEW: Relatório                             -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="page-section" id="view-relatorio">
+      <div class="container">
+
+        <div class="page-header">
+          <h1>Relatório de Manifestações</h1>
+          <p>Consulte os municípios que manifestaram interesse em aderir ao Diário de Classe.</p>
+        </div>
+
+        <div class="summary-row">
+          <div class="summary-card">
+            <div class="summary-card-icon total">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div class="summary-card-info">
+              <div class="summary-card-value" id="total-count">0</div>
+              <div class="summary-card-label">Total de manifestações</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="filters-bar">
+          <div class="filter-group">
+            <label for="filterMunicipio">Município</label>
+            <select id="filterMunicipio">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filterBusca">Buscar</label>
+            <input type="text" id="filterBusca" placeholder="Nome do município..." />
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-primary" onclick="aplicarFiltrosRelatorio()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Filtrar
+            </button>
+            <button class="btn btn-secondary" onclick="limparFiltrosRelatorio()">Limpar</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Município</th>
+                  <th>Data da Manifestação</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaBody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer" id="tableFooter">
+            <span id="tableInfo">0 manifestações</span>
+            <div class="pagination" id="pagination"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="pagefoot">
+    <div class="container">
+      Sala do Futuro · Secretaria da Educação
+    </div>
+  </footer>
+
+  <script>
+    /* ─── 645 Municípios de São Paulo ─── */
+    var municipiosSP = [
+      "Adamantina","Adolfo","Aguaí","Águas da Prata","Águas de Lindóia","Águas de Santa Bárbara",
+      "Águas de São Pedro","Agudos","Alambari","Alfredo Marcondes","Altair","Alto Alegre",
+      "Alto Porã","Alumínio","Álvares Florence","Álvares Machado","Álvaro de Carvalho","Alvinlândia",
+      "Americana","Américo Brasiliense","Américo de Campos","Amparo","Analândia","Andradina",
+      "Angatuba","Anhembi","Anhumas","Aparecida","Aparecida d'Oeste","Apiaí","Araraquara",
+      "Araçariguama","Araçatuba","Araçoiaba da Serra","Aramina","Arandu","Arapei","Araras",
+      "Arco-Íris","Arealva","Areias","Areiópolis","Ariranha","Artur Nogueira","Arujá",
+      "Aspásia","Assis","Atibaia","Auriflama","Avaí","Avanhandava","Avaré","Bady Bassitt",
+      "Balbinos","Bálsamo","Bananal","Barão de Antonina","Barbosa","Bariri","Barra Bonita",
+      "Barra do Chapéu","Barra do Turvo","Barretos","Barro Preto","Bauru","Bebedouro",
+      "Bento de Abreu","Bernardino de Campos","Bertioga","Bilac","Birigui","Biritiba Mirim",
+      "Boa Esperança do Sul","Boa Vista Paulista","Bocaina","Bofete","Boituva","Bom Jesus dos Perdões",
+      "Bom Sucesso de Itararé","Borá","Boracéia","Borborema","Borebi","Botucatu","Bragança Paulista",
+      "Braúna","Brejo Alegre","Brotas","Buri","Buritama","Buritizal",
+      "Cabrália Paulista","Cabreúva","Cachoeira Paulista","Caconde","Cafelândia",
+      "Caiabu","Caieiras","Caiuá","Cajamar","Cajati","Cajuru","Cambaratiba",
+      "Câmpos Novos Paulista","Cananéia","Cândido Mota","Cândido Rodrigues","Canitar",
+      "Capão Bonito","Capela do Alto","Capitão Prudente","Cardoso","Casa Branca","Cássia dos Coqueiros",
+      "Castilho","Catanduva","Catiguá","Cedral","Cerqueira César","Cerquilho",
+      "Cesário Lange","Charqueada","Chavantes","Clementino","Colina","Colômbia","Conchal",
+      "Conchas","Cordeirópolis","Cornélio Procópio","Coronel Macedo","Corumbataí","Cosmópolis",
+      "Cosmorama","Cotia","Cravinhos","Cristais Paulista","Cruzália","Cruzeiro","Cubatão",
+      "Cunha","Descalvado","Diadema","Dirce Reis","Divinolândia","Dobrada","Dois Córregos",
+      "Dolcinópolis","Dourado","Dracena","Duartina","Dumont","Echaporã","Eldorado",
+      "Espírito Santo do Pinhal","Espírito Santo do Turvo","Estrela d'Oeste","Estrela do Norte",
+      "Euclides da Cunha Paulista","Fartura","Fernando Prestes","Fernandópolis","Fernão","Ferraz de Vasconcelos",
+      "Flora Rica","Floreal","Flórida Paulista","Florínia","Franca","Francisco Morato",
+      "Franco da Rocha","Gabriel Monteiro","Garça","Gavião Peixoto","Guapiaçu","Guapiara",
+      "Guará","Guaraúna","Guaratinguetá","Guareí","Guariba","Guarujá","Guarulhos",
+      "Herculândia","Holambra","Iacanga","Iacri","Ibaté","Ibitinga",
+      "Iguape","Ilha Comprida","Ilha Solteira","Indaiatuba","Indiana","Ipaussu",
+      "Itaberá","Itaí","Itajobi","Itaju","Itanhaém","Itaóca","Itapetininga",
+      "Itapeva","Itapevi","Itapira","Itapirapuã Paulista","Itápolis","Itaporanga",
+      "Itapuí","Itapura","Itatiba","Itatinga","Itirapina","Itirapuã","Itobi","Itu",
+      "Itupeva","Ituverava","Jaborandi","Jaboticabal","Jacareí","Jaci",
+      "Jacupiranga","Jaguariúna","Jales","Jambeiro","Jandira","Jardinópolis","Jarinu",
+      "Jaú","Jeriquara","Joanópolis","João Ramalho","José Bonifácio","Júlio Mesquita",
+      "Jumirim","Jundiaí","Junqueirópolis","Juquitiba","Lagoinha","Laranjal Paulista",
+      "Lavrinhas","Leme","Lencóis Paulista","Limeira","Lindóia","Lins","Loanda",
+      "Lorena","Lourdes","Louveira","Lucélia","Lucianópolis","Luís Antônio","Lutécia",
+      "Macaatuba","Macaubal","Macedônia","Magenta","Mairinque","Mairiporã","Marabá Paulista",
+      "Maracaí","Marapoama","Mariápolis","Marília","Marinópolis","Martinópolis","Matão",
+      "Mauá","Mendonça","Meridiano","Mesópolis","Miguelópolis","Mineiros do Tietê","Miracatu",
+      "Mira Estrela","Mirandópolis","Mirante do Paranapanema","Mirassol","Mirassolândia","Mococa",
+      "Mogi das Cruzes","Mogi Guaçu","Moji Mirim","Monções","Morro Agudo","Morungaba",
+      "Motuca","Nazaré Paulista","Neves Paulista","Nhandeara","Nipoã","Nova Aliança",
+      "Nova Campina","Nova Canaã Paulista","Nova Castilho","Nova Europa","Nova Granada",
+      "Nova Guataporanga","Nova Independência","Novo Horizonte","Nuporanga","Ocauçu","Óleo",
+      "Olímpia","Onda Verde","Oriente","Orindiúva","Orlândia","Osasco","Oscar Bressane",
+      "Osvaldo Cruz","Ourinhos","Ouroeste","Ouro Verde","Pacaembu","Palestina",
+      "Palmares Paulista","Palmeira d'Oeste","Palmital","Panorama","Paraibuna","Paraíso",
+      "Paranapanema","Paranapuã","Parapuã","Pardinho","Pariquera-Açu","Parisi","Patrocínio Paulista",
+      "Paulicéia","Paulínia","Paulo de Faria","Pederneiras","Pedra Bela",
+      "Pedranópolis","Pedregulho","Pedreira","Pedrinhas Paulista","Pompéia","Pongaí",
+      "Porangaba","Porto Feliz","Porto Ferreira","Potim","Potirendaba","Pradópolis",
+      "Praia Grande","Presidente Epitácio","Presidente Prudente","Presidente Venceslau",
+      "Quatá","Quatiguá","Queiroz","Queluz","Quintana","Rafard",
+      "Raposo Tavares","Redenção da Serra","Regente Feijó","Reginópolis","Registro",
+      "Restinga","Ribeirão Bonito","Ribeirão Preto","Ribeirão do Sul","Rifaina","Rincão",
+      "Riolândia","Riversul","Roseira","Rubiácea","Rubinéia","Sabino","Sagres",
+      "Sales","Salesópolis","Salmourão","Saltinho","Salto","Salto de Pirapora","Salto Grande",
+      "Sandovalina","Santa Adélia","Santa Albertina","Santa Bárbara d'Oeste","Santa Branca",
+      "Santa Clara d'Oeste","Santa Cruz da Conceição","Santa Cruz das Palmeiras","Santa Cruz do Rio Pardo",
+      "Santa Ernestina","Santa Fé do Sul","Santa Gertrudes","Santa Isabel",
+      "Santa Lúcia","Santa Maria da Serra","Santa Mercedes","Santa Rita do Passa Quatro",
+      "Santa Rosa de Viterbo","Santa Sales","Santana de Parnaíba",
+      "Santo Anastácio","Santo André","Santo Antônio da Alegria",
+      "Santo Antônio do Jardim","Santo Antônio do Pinhal",
+      "Santo Expedito","Santo Hipólito","Santos","São Bento do Sapucaí","São Bernardo do Campo",
+      "São Caetano do Sul","São Carlos","São Francisco","São Francisco da Prata",
+      "São João da Boa Vista","São João das Duas Pontes","São João de Iracema",
+      "São João do Pau d'Alho","São Joaquim da Barra","São José da Bela Vista",
+      "São José do Barreiro","São José do Rio Pardo","São José do Rio Preto",
+      "São José dos Campos","São Lourenço da Serra","São Luís do Paraitinga",
+      "São Manuel","São Miguel Arcanjo","São Paulo","São Pedro","São Pedro do Turvo",
+      "São Roque","São Simão","São Sebastião","São Sebastião da Grama","São Vicente",
+      "Sarapuí","Sarutaiá","Sebastianópolis do Sul","Serra Azul","Serrana","Serra Negra",
+      "Sertãozinho","Sete Barras","Severínia","Silveiras","Socorro",
+      "Sorocaba","Sud Mennucci","Sumaré","Suzanápolis","Suzano","Tabapuã","Tabatinga",
+      "Taboão da Serra","Taciba","Taguaí","Taiaçu","Taiúva","Tambaú","Tanabi",
+      "Tapiraí","Tapiratiba","Taquaral","Taquaritinga","Taquarituba","Taquarivaí","Tarabai",
+      "Tarumã","Tatuapé","Tupã","Tupi Paulista","Urupês","Vargem Grande do Sul",
+      "Vargem Grande Paulista","Várzea Paulista","Vinhedo","Viradouro","Vista Alegre do Alto",
+      "Votorantim","Votuporanga","Zacarias"
+    ];
+
+    /* ═══════════════════════════════════════════ */
+    /*  VIEW SWITCHING                              */
+    /* ═══════════════════════════════════════════ */
+
+    function trocarView(view) {
+      document.querySelectorAll('.topnav-tab').forEach(function(t) {
+        t.classList.toggle('active', t.dataset.view === view);
+      });
+      document.getElementById('view-manifestacao').classList.toggle('active', view === 'manifestacao');
+      document.getElementById('view-relatorio').classList.toggle('active', view === 'relatorio');
+      document.querySelector('.step-menu').style.display = view === 'manifestacao' ? '' : 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (view === 'relatorio') {
+        carregarERenderizarRelatorio();
+      }
+    }
+
+    /* ═══════════════════════════════════════════ */
+    /*  MANIFESTAÇÃO — 4-STEP WIZARD                */
+    /* ═══════════════════════════════════════════ */
+
+    var stepAtual = 1;
+
+    function atualizar() {
+      document.querySelectorAll('.step-menu-item').forEach(function(el) {
+        var s = parseInt(el.dataset.step);
+        el.classList.remove('active', 'done', 'future');
+        if (s === stepAtual) el.classList.add('active');
+        else if (s < stepAtual) el.classList.add('done');
+        else el.classList.add('future');
+      });
+      document.querySelectorAll('.step-content').forEach(function(el) {
+        el.classList.toggle('active', el.id === 'step-' + stepAtual);
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function irPara(n) {
+      if (n > stepAtual) return;
+      stepAtual = n;
+      atualizar();
+    }
+
+    function avancar() {
+      if (stepAtual === 1) {
+        stepAtual = 2;
+        atualizar();
+      } else if (stepAtual === 2) {
+        stepAtual = 3;
+        atualizar();
+        document.getElementById('termText').classList.remove('open');
+        document.getElementById('acceptCheck').checked = false;
+        toggleConfirmBtn();
+      } else if (stepAtual === 3) {
+        var mun = document.getElementById('selMun').value;
+        var dataHoje = new Date().toISOString().slice(0, 10);
+        if (mun) {
+          var lista = [];
+          try { lista = JSON.parse(localStorage.getItem('manifestacoes') || '[]'); } catch (e) {}
+          var duplicado = lista.some(function(item) { return item.municipio === mun; });
+          if (!duplicado) {
+            lista.push({ id: Date.now(), municipio: mun, dataManifestacao: dataHoje });
+            try { localStorage.setItem('manifestacoes', JSON.stringify(lista)); } catch (e) {}
+          }
+        }
+        stepAtual = 4;
+        atualizar();
+      }
+    }
+
+    function voltar() {
+      if (stepAtual === 2) {
+        stepAtual = 1;
+        atualizar();
+      } else if (stepAtual === 3) {
+        stepAtual = 2;
+        atualizar();
+        document.getElementById('acceptCheck').checked = false;
+        toggleConfirmBtn();
+        document.getElementById('termText').classList.remove('open');
+      } else if (stepAtual === 4) {
+        stepAtual = 3;
+        atualizar();
+      }
+    }
+
+    function toggleTermo() {
+      document.getElementById('termText').classList.toggle('open');
+    }
+
+    function toggleConfirmBtn() {
+      document.getElementById('confirmBtn').disabled = !document.getElementById('acceptCheck').checked;
+    }
+
+    function voltarAoInicio() {
+      stepAtual = 1;
+      atualizar();
+      document.getElementById('acceptCheck').checked = false;
+      toggleConfirmBtn();
+      document.getElementById('termText').classList.remove('open');
+    }
+
+    function popularMunicipios() {
+      var sel = document.getElementById('selMun');
+      var sorted = municipiosSP.slice().sort(function(a, b) { return a.localeCompare(b, 'pt-BR'); });
+      sorted.forEach(function(m) {
+        var opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        sel.appendChild(opt);
+      });
+    }
+
+    function validarSelecao() {
+      var ok = document.getElementById('selMun').value !== '';
+      document.getElementById('btnStep1').disabled = !ok;
+    }
+
+    popularMunicipios();
+
+    /* ═══════════════════════════════════════════ */
+    /*  RELATÓRIO                                  */
+    /* ═══════════════════════════════════════════ */
+
+    var manifestacoes = [];
+    var manifestacoesFiltradas = [];
+    var paginaAtual = 1;
+    var porPagina = 8;
+
+    function carregarERenderizarRelatorio() {
+      try {
+        manifestacoes = JSON.parse(localStorage.getItem('manifestacoes') || '[]');
+      } catch (e) {
+        manifestacoes = [];
+      }
+      manifestacoesFiltradas = manifestacoes.slice();
+      popularFiltroMunicipioRelatorio();
+      paginaAtual = 1;
+      renderizarRelatorio();
+    }
+
+    function popularFiltroMunicipioRelatorio() {
+      var sel = document.getElementById('filterMunicipio');
+      while (sel.options.length > 1) sel.remove(1);
+      var sorted = municipiosSP.slice().sort(function(a, b) { return a.localeCompare(b, 'pt-BR'); });
+      sorted.forEach(function(m) {
+        var opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        sel.appendChild(opt);
+      });
+    }
+
+    function aplicarFiltrosRelatorio() {
+      var municipio = document.getElementById('filterMunicipio').value;
+      var busca = document.getElementById('filterBusca').value.toLowerCase().trim();
+      manifestacoesFiltradas = manifestacoes.filter(function(m) {
+        if (municipio && m.municipio !== municipio) return false;
+        if (busca && m.municipio.toLowerCase().indexOf(busca) === -1) return false;
+        return true;
+      });
+      paginaAtual = 1;
+      renderizarRelatorio();
+    }
+
+    function limparFiltrosRelatorio() {
+      document.getElementById('filterMunicipio').value = '';
+      document.getElementById('filterBusca').value = '';
+      manifestacoesFiltradas = manifestacoes.slice();
+      paginaAtual = 1;
+      renderizarRelatorio();
+    }
+
+    function renderizarRelatorio() {
+      renderizarResumoRelatorio();
+      renderizarTabelaRelatorio();
+      renderizarPaginacaoRelatorio();
+    }
+
+    function renderizarResumoRelatorio() {
+      document.getElementById('total-count').textContent = manifestacoesFiltradas.length;
+    }
+
+    function renderizarTabelaRelatorio() {
+      var tbody = document.getElementById('tabelaBody');
+      var inicio = (paginaAtual - 1) * porPagina;
+      var fim = inicio + porPagina;
+      var pagina = manifestacoesFiltradas.slice(inicio, fim);
+
+      if (pagina.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2"><div class="empty-state">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+          '<h3>Nenhuma manifestação encontrada</h3>' +
+          '<p>Manifestações registradas aparecerão aqui automaticamente.</p>' +
+          '</div></td></tr>';
+        document.getElementById('tableInfo').textContent = '0 manifestações';
+        document.getElementById('pagination').innerHTML = '';
+        return;
+      }
+
+      var html = '';
+      pagina.forEach(function(m) {
+        html += '<tr>' +
+          '<td class="municipio-cell">' + m.municipio + '</td>' +
+          '<td class="date-cell">' + formatarData(m.dataManifestacao) + '</td>' +
+          '</tr>';
+      });
+      tbody.innerHTML = html;
+
+      var total = manifestacoesFiltradas.length;
+      document.getElementById('tableInfo').textContent = total + ' manifestação' + (total !== 1 ? 's' : '');
+    }
+
+    function renderizarPaginacaoRelatorio() {
+      var totalPaginas = Math.ceil(manifestacoesFiltradas.length / porPagina);
+      var pag = document.getElementById('pagination');
+
+      if (totalPaginas <= 1) {
+        pag.innerHTML = '';
+        return;
+      }
+
+      var html = '<button ' + (paginaAtual <= 1 ? 'disabled' : '') + ' onclick="irPaginaRelatorio(' + (paginaAtual - 1) + ')">&lsaquo;</button>';
+      for (var i = 1; i <= totalPaginas; i++) {
+        html += '<button class="' + (i === paginaAtual ? 'active' : '') + '" onclick="irPaginaRelatorio(' + i + ')">' + i + '</button>';
+      }
+      html += '<button ' + (paginaAtual >= totalPaginas ? 'disabled' : '') + ' onclick="irPaginaRelatorio(' + (paginaAtual + 1) + ')">&rsaquo;</button>';
+      pag.innerHTML = html;
+    }
+
+    function irPaginaRelatorio(n) {
+      var totalPaginas = Math.ceil(manifestacoesFiltradas.length / porPagina);
+      if (n < 1 || n > totalPaginas) return;
+      paginaAtual = n;
+      renderizarTabelaRelatorio();
+      renderizarPaginacaoRelatorio();
+    }
+
+    function formatarData(dataStr) {
+      if (!dataStr) return '—';
+      var parts = dataStr.split('-');
+      return parts[2] + '/' + parts[1] + '/' + parts[0];
+    }
+  </script>
+
+</body>
+</html>
