@@ -567,6 +567,7 @@
       .card { padding: 20px; }
     }
   </style>
+  <script src="https://unpkg.com/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -630,6 +631,10 @@
               <select id="selMun" onchange="validarSelecao()" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;background:var(--surface);color:var(--fg);font-family:var(--font)">
                 <option value="">Selecione o município</option>
               </select>
+              <div id="msgDuplicado" style="display:none;margin-top:8px;padding:10px 14px;background:#fef3cd;border:1px solid #ffc107;border-radius:var(--radius);font-size:13px;color:#856404">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#856404" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:-3px;margin-right:6px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Este município já manifestou interesse. Não é possível registrar uma nova manifestação.
+              </div>
             </div>
             <div class="btn-row">
               <button class="btn btn-primary" id="btnStep1" disabled onclick="avancar()">Continuar</button>
@@ -801,6 +806,10 @@
               utilização da solução.
             </p>
             <div class="btn-row btn-row-center" style="margin-top:var(--gap-lg)">
+              <button class="btn btn-secondary" onclick="baixarTermo()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;flex-shrink:0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Baixar Termo (PDF)
+              </button>
               <button class="btn btn-primary" onclick="voltarAoInicio()">Voltar ao início</button>
             </div>
           </div>
@@ -1015,6 +1024,14 @@
 
     function avancar() {
       if (stepAtual === 1) {
+        var mun = document.getElementById('selMun').value;
+        var lista = [];
+        try { lista = JSON.parse(localStorage.getItem('manifestacoes') || '[]'); } catch (e) {}
+        if (lista.some(function(item) { return item.municipio === mun; })) {
+          document.getElementById('msgDuplicado').style.display = '';
+          document.getElementById('btnStep1').disabled = true;
+          return;
+        }
         stepAtual = 2;
         atualizar();
       } else if (stepAtual === 2) {
@@ -1025,15 +1042,17 @@
         toggleConfirmBtn();
       } else if (stepAtual === 3) {
         var mun = document.getElementById('selMun').value;
+        var lista = [];
+        try { lista = JSON.parse(localStorage.getItem('manifestacoes') || '[]'); } catch (e) {}
+        var duplicado = lista.some(function(item) { return item.municipio === mun; });
+        if (duplicado) {
+          alert('Este município já manifestou interesse. Não é possível registrar uma nova manifestação.');
+          return;
+        }
         var dataHoje = new Date().toISOString().slice(0, 10);
         if (mun) {
-          var lista = [];
-          try { lista = JSON.parse(localStorage.getItem('manifestacoes') || '[]'); } catch (e) {}
-          var duplicado = lista.some(function(item) { return item.municipio === mun; });
-          if (!duplicado) {
-            lista.push({ id: Date.now(), municipio: mun, dataManifestacao: dataHoje });
-            try { localStorage.setItem('manifestacoes', JSON.stringify(lista)); } catch (e) {}
-          }
+          lista.push({ id: Date.now(), municipio: mun, dataManifestacao: dataHoje });
+          try { localStorage.setItem('manifestacoes', JSON.stringify(lista)); } catch (e) {}
         }
         stepAtual = 4;
         atualizar();
@@ -1067,9 +1086,74 @@
     function voltarAoInicio() {
       stepAtual = 1;
       atualizar();
+      document.getElementById('selMun').value = '';
       document.getElementById('acceptCheck').checked = false;
       toggleConfirmBtn();
       document.getElementById('termText').classList.remove('open');
+      validarSelecao();
+    }
+
+    function baixarTermo() {
+      var jsPDF = window.jspdf.jsPDF;
+      var doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+      var mun = document.getElementById('selMun').value || 'Não informado';
+      var dataHoje = new Date().toLocaleDateString('pt-BR');
+
+      var left = 20;
+      var top = 25;
+      var pageW = 210;
+      var textW = pageW - 40;
+
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text('TERMO DE MANIFESTAÇÃO DE INTERESSE', left, top, { maxWidth: textW });
+      doc.text('PARA UTILIZAÇÃO DO DIÁRIO DE CLASSE', left, top + 7, { maxWidth: textW });
+
+      doc.setFontSize(10);
+      doc.setFont('Helvetica', 'normal');
+      doc.text('Município: ' + mun, left, top + 20);
+      doc.text('Data: ' + dataHoje, left, top + 26);
+
+      var y = top + 38;
+      var lineH = 5.5;
+
+      var secoes = [
+        { num: '1.', titulo: 'Objetivo', text: 'O presente Termo de Manifestação de Interesse tem por objetivo formalizar o interesse do município na utilização do módulo Diário de Classe, disponibilizado na plataforma Sala do Futuro, bem como apresentar os requisitos funcionais, operacionais e técnicos necessários para sua futura utilização. A manifestação de interesse não caracteriza a liberação imediata do acesso ao sistema, estando sua disponibilização condicionada ao atendimento dos requisitos estabelecidos neste documento e aos procedimentos definidos pela Secretaria da Educação.' },
+        { num: '2.', titulo: 'Sobre o Diário de Classe', text: 'O Diário de Classe é uma solução destinada ao registro e acompanhamento das atividades acadêmicas das unidades escolares. Por meio do sistema, os usuários poderão realizar atividades como: lançamento de frequência dos estudantes; registro das aulas ministradas; lançamento de avaliações; lançamento de notas; acompanhamento do desempenho escolar; consulta de informações acadêmicas; acompanhamento pedagógico das turmas.' },
+        { num: '3.', titulo: 'Requisitos para Utilização', text: 'Para utilização do Diário de Classe, o município deverá possuir acesso ativo à plataforma Sala do Futuro e atender aos requisitos funcionais descritos neste documento. O correto funcionamento do Diário de Classe depende da existência, manutenção e atualização das informações provenientes dos demais módulos e sistemas integrados da plataforma. Além disso, o município deverá possuir infraestrutura tecnológica adequada para acesso ao sistema.' },
+        { num: '4.', titulo: 'Dependências Funcionais', text: 'Para que o Diário de Classe possa ser utilizado, deverão estar devidamente configurados e atualizados os seguintes módulos: Coleta de Classes (turmas da rede de ensino); Matrícula (vínculo dos estudantes às turmas); Fundamento Legal (componentes curriculares); Matriz Curricular (disciplinas ofertadas); Quadro Aula (distribuição das aulas nas turmas); Calendário Escolar (dias letivos e não letivos); Atribuição de Professores (vínculo entre docentes e turmas); Grade Horária (organização dos horários — uso não obrigatório).' },
+        { num: '5.', titulo: 'Perfis de Acesso', text: 'Os usuários deverão possuir acesso ativo à plataforma Sala do Futuro e permissões compatíveis com suas atribuições. O acesso ao Diário de Classe será concedido de acordo com os vínculos e permissões cadastrados nos sistemas integrados.' },
+        { num: '6.', titulo: 'Responsabilidades do Município', text: 'Ao manifestar interesse, o município declara: manter atualizadas as informações cadastrais e acadêmicas; realizar as configurações obrigatórias dos módulos integrados; garantir a consistência e qualidade dos dados; ser responsável pela administração dos usuários da rede de ensino; observar os procedimentos definidos pela Secretaria da Educação; disponibilizar a infraestrutura tecnológica necessária.' },
+        { num: '7.', titulo: 'Infraestrutura e Equipamentos', text: 'A disponibilização do Diário de Classe compreende exclusivamente o acesso ao sistema. A Secretaria da Educação não fornecerá computadores, notebooks, tablets, dispositivos móveis, equipamentos de rede, acesso à internet ou quaisquer outros recursos de infraestrutura, sendo tais itens de responsabilidade exclusiva do município.' },
+        { num: '8.', titulo: 'Proteção de Dados Pessoais', text: 'O município declara estar ciente de que a utilização do Diário de Classe envolve o tratamento de dados pessoais de estudantes, responsáveis, docentes e demais usuários. Compete ao município observar as disposições da Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018), adotando as medidas necessárias para garantir a proteção dos dados pessoais tratados no âmbito de sua atuação, bem como assegurar que o acesso ao sistema seja realizado exclusivamente por usuários devidamente autorizados. O município compromete-se a utilizar as informações acessadas exclusivamente para finalidades educacionais e administrativas relacionadas à execução das atividades da rede de ensino.' },
+        { num: '9.', titulo: 'Considerações Gerais', text: 'O Diário de Classe depende da correta integração entre os módulos da plataforma Sala do Futuro. A ausência, inconsistência ou desatualização das informações poderá impactar diretamente o funcionamento do sistema. As regras, integrações e fluxos descritos neste documento representam o modelo atualmente adotado e poderão sofrer alterações conforme a evolução funcional da plataforma. A assinatura deste Termo representa apenas a manifestação de interesse e a ciência quanto aos requisitos, não gerando obrigação imediata de disponibilização do sistema pela Secretaria da Educação.' },
+        { num: '10.', titulo: 'Manifestação de Interesse', text: 'Ao concordar com este documento, o representante legal do município declara estar ciente das condições, responsabilidades e requisitos estabelecidos neste Termo de Manifestação de Interesse para utilização do Diário de Classe.' }
+      ];
+
+      for (var i = 0; i < secoes.length; i++) {
+        var s = secoes[i];
+        if (y > 260) { doc.addPage(); y = 25; }
+
+        doc.setFont('Helvetica', 'bold');
+        doc.setFontSize(10);
+        var titleLine = s.num + ' ' + s.titulo;
+        var titleH = doc.getTextDimensions(titleLine, { maxWidth: textW }).h;
+        doc.text(titleLine, left, y, { maxWidth: textW });
+        y += titleH + 1;
+
+        doc.setFont('Helvetica', 'normal');
+        doc.setFontSize(9.5);
+        var textH = doc.getTextDimensions(s.text, { maxWidth: textW }).h;
+        doc.text(s.text, left, y, { maxWidth: textW });
+        y += textH + 6;
+      }
+
+      doc.setFontSize(8);
+      doc.setFont('Helvetica', 'normal');
+      doc.setTextColor(120);
+      doc.text('Documento gerado automaticamente pela plataforma Sala do Futuro — Secretaria da Educação.', left, 280);
+      doc.save('Termo_Manifestacao_' + mun.replace(/\s+/g, '_') + '.pdf');
     }
 
     function popularMunicipios() {
@@ -1084,8 +1168,13 @@
     }
 
     function validarSelecao() {
-      var ok = document.getElementById('selMun').value !== '';
-      document.getElementById('btnStep1').disabled = !ok;
+      var mun = document.getElementById('selMun').value;
+      var msg = document.getElementById('msgDuplicado');
+      var lista = [];
+      try { lista = JSON.parse(localStorage.getItem('manifestacoes') || '[]'); } catch (e) {}
+      var duplicado = mun && lista.some(function(item) { return item.municipio === mun; });
+      msg.style.display = duplicado ? '' : 'none';
+      document.getElementById('btnStep1').disabled = !mun || duplicado;
     }
 
     popularMunicipios();
